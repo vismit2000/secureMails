@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    {% load staticfiles %}
+    <meta charset="utf-8">
+    <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Montserrat" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="{% static '/css/style2.css' %}"/>
+    <link rel="icon" href="favicon.png" type="image/x-icon">
+    <script type="application/javascript" src="{% static '/js/script.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sjcl/1.0.8/sjcl.js" type="application/javascript"></script>
+    <title>Hello World</title>
+  </head>
+  <body>
+    <div class="wrapper">
+    <div class="container">
+      <header>
+        <h1 class="name">SECUREMAIL</h1>
+      </header>
+      
+      <textarea class="messageBox">
+      </textarea>
+
+      <button name="Encrypt" id="encryptBtn" class="btn" onclick="encrypt();">Encrypt</button>
+      <button name="Decrypt" id="decryptBtn" class="btn" onclick="decrypt();">Decrypt</button>
+  </div>
+  </div>
+  </body>
+</html>
