@@ -13,7 +13,7 @@ def savedata(request):
 	res = {}
 	if request.method == 'POST':
 		reqObj = json.loads( request.body.decode('utf-8') )
-		msgJsonData = json.loads( reqObj['body'] )
+		msgJsonData = reqObj
 		msgsEntry = msgsData(key = msgJsonData['key'],value= json.dumps(msgJsonData['value']))
 		msgsEntry.save()
 		res['message'] = 'Data saved Successfully'
@@ -22,3 +22,17 @@ def savedata(request):
 		res['error'] = 'Not recieved a post request'
 	print(res)
 	return JsonResponse(res)
+
+def getparams(request):
+	params = {}
+	params['ivsalt'] = request.GET.get('ivsalt')
+	saltindex = params['ivsalt'].index('|@@@@@|')
+	iv = params['ivsalt'][0:saltindex]
+	salt = params['ivsalt'][saltindex+7:]
+	params['iv'] = iv
+	params['salt'] = salt
+	msgObject = msgsData.objects.get(key = iv+'|@|'+salt)
+	params['msgObj'] = json.loads(msgObject.value)
+	print(type(msgObject))
+	print(params)
+	return render(request,'index.html', {'msgObj': params['msgObj']})

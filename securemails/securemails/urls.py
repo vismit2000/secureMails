@@ -23,5 +23,5 @@ from mailapp import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^mailapp/',include('mailapp.urls')),
-    url(r'^$',views.index,name='index'),
+    # url(r'^$',views.index,name='index'),
 ]

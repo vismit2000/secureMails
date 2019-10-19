@@ -9,8 +9,17 @@
     <script type="application/javascript" src="{% static '/js/script.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sjcl/1.0.8/sjcl.js" type="application/javascript"></script>
     <title>Hello World</title>
+
+    <script>
+        function loadtext()
+        {
+          msgObj = '{{msgObj | safe}}';
+          console.log(JSON.parse(msgObj));
+          decrypt(msgObj);
+        }
+    </script>
   </head>
-  <body>
+  <body onload = "loadtext();">
     <div class="wrapper">
     <div class="container">
       <header>
@@ -18,6 +27,7 @@
       </header>
       
       <textarea class="messageBox">
+        
       </textarea>
 
       <button name="Encrypt" id="encryptBtn" class="btn" onclick="encrypt();">Encrypt</button>
