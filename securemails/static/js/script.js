@@ -1,22 +1,7 @@
 var encrypted;
-function getCookie(name) {  
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-        let cookies = document.cookie.split(";");
-        
-        (function() {
-            let i = 0;
-            for ( i = 0; i < cookies.length; i+=1) {
-                let cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + "=")) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        })();        
-    }
-    return cookieValue;
+function getCookie(name) {
+  var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+  return v ? v[2] : null;
 }
 
 function sendRequest(url,type,data){
@@ -39,12 +24,14 @@ function sendRequest(url,type,data){
         };
         // Setup our HTTP request
 		request.open(type || "GET", url, true);
+		console.log(csrftoken);
         // Add csrf token
         request.setRequestHeader("X-CSRFToken", csrftoken);
+        request.setRequestHeader("Content-Type", "application/json; charset=utf-8");
         // Send the request
         request.send(JSON.stringify(data));
     });
-    
+
 }
 
 function getPassword()
@@ -67,29 +54,29 @@ function encrypt()
     var data = document.getElementsByClassName('messageBox')[0].value;
     encrypted = sjcl.encrypt(pwd, data);
     var parsedEncData = JSON.parse(encrypted);
-    var content = parsedEncData['ct'];    
+    var content = parsedEncData['ct'];
     var key = parsedEncData['iv']+'|@|'+parsedEncData['salt'];
     var dict = {};
     dict['key'] = key;
     dict['value'] = encrypted;
     console.log(dict);
-    
+
     sendRequest("/mailapp/savedata/","POST",dict)
 	.then(function (response) {
         response = JSON.parse(response);
         // console.log(response['error']);
-        console.log("Success!",response);    
+        console.log("Success!",response);
 
         document.getElementsByClassName('messageBox')[0].value = content;
-        msgContent = '127.0.0.1:8000/mailapp/getparams/?ivsalt='+parsedEncData['iv']+'|@@@@@|'+parsedEncData['salt'];
-        
+        msgContent = 'https://bitsf463.pythonanywhere.com//mailapp/getparams/?ivsalt='+parsedEncData['iv']+'|@@@@@|'+parsedEncData['salt'];
+
         if (confirm("Enciphered!! do you want to mail it?")) {
-            window.location.href = 'https://mail.google.com/mail/?view=cm&fs=1&tf=1&body="'+msgContent+'"';
-        } 
+            window.location.href = 'https://mail.google.com/mail/?view=cm&fs=1&tf=1&body='+encodeURIComponent(msgContent);
+        }
         else {
             console.log('cancelled!!');
         }
-    })        
+    })
 	.catch(function (error) {
 		console.log("Something went wrong", error);
     });

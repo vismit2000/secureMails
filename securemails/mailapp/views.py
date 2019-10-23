@@ -4,10 +4,13 @@ from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render,redirect
 from mailapp.models import *
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 
+@ensure_csrf_cookie
 def index(request):
 	return render(request,'index.html')
 
+@csrf_protect
 def savedata(request):
 	print('hi')
 	res = {}
@@ -23,6 +26,7 @@ def savedata(request):
 	print(res)
 	return JsonResponse(res)
 
+@csrf_protect
 def getparams(request):
 	params = {}
 	params['ivsalt'] = request.GET.get('ivsalt')

@@ -1,0 +1,6 @@
+Enter your message in the textarea provided
+Click on Enrypt and enter a secret password when prompted for
+It will encrypt the text and redirect you to the Gmail
+Send it to desired receiver and on receiver side, person will have to copy the link and paste it to browser
+He will be redirected to our web app and will be prompted for the password( currently, assumed that somehow it is shared securely between two parties)
+When he enters password. decryption is done successfully and corresponding plaintext is displayed in the box.
