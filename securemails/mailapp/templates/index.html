@@ -1,38 +1,13 @@
-<!doctype html>
-<html>
-  <head>
-    {% load staticfiles %}
-    <meta charset="utf-8">
-    <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Montserrat" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" type="text/css" href="{% static '/css/style2.css' %}"/>
-    <link rel="icon" href="favicon.png" type="image/x-icon">
-    <script type="application/javascript" src="{% static '/js/script.js' %}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sjcl/1.0.8/sjcl.js" type="application/javascript"></script>
-    <title>Hello World</title>
-
-    <script>
-        function loadtext()
-        {
-          msgObj = '{{msgObj | safe}}';
-          console.log(JSON.parse(msgObj));
-          decrypt(msgObj);
-        }
-    </script>
-  </head>
-  <body onload = "loadtext();">
-    <div class="wrapper">
-    <div class="container">
-      <header>
-        <h1 class="name">SECUREMAIL</h1>
-      </header>
-      
-      <textarea class="messageBox">
-        
-      </textarea>
-
-      <button name="Encrypt" id="encryptBtn" class="btn" onclick="encrypt();">Encrypt</button>
-      <button name="Decrypt" id="decryptBtn" class="btn" onclick="decrypt();">Decrypt</button>
+{% extends "base.html" %}
+{% block body_block %}
+<div class="container">
+  <div class="jumbotron">
+    <h1>Welcome to the website !</h1>
+    {% if user.is_authenticated %}
+        <h2>Hello {{ user.username }}</h2>
+    {% else %}
+        <h2>To access the map and indices-register or login</h2>
+    {% endif %}
   </div>
-  </div>
-  </body>
-</html>
+</div>
+{% endblock %}

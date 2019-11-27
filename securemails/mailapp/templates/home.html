@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+  <head>
+    {% load staticfiles %}
+    <meta charset="utf-8">
+    <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Montserrat" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="{% static '/css/style2.css' %}"/>
+    <link rel="icon" href="favicon.png" type="image/x-icon">
+    <script type="application/javascript" src="{% static '/js/script.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sjcl/1.0.8/sjcl.js" type="application/javascript"></script>
+    <title>Hello World</title>
+
+    <script>
+        function loadtext()
+        {
+          msgObj = '{{msgObj | safe}}';
+          usersList = '{{usersList | safe}}';
+          usersListm = '{{usersList}}';
+          console.log(usersListm);
+          console.log(usersList);
+          console.log(JSON.parse(msgObj));
+          decrypt(msgObj);
+        }
+    </script>
+  </head>
+  <body onload = "loadtext();">
+    <div id='logout' style='position: absolute;top:0;left:45vw;'>
+      <pre>
+          <a href='/logout/'><input type="button" value="Logout" class="logout"/></a>
+      </pre>
+  </div>
+    <div class="wrapper">
+    <div class="container">
+      <header>
+        <h1 class="name">SECUREMAIL</h1>
+      </header>
+      
+      <textarea class="messageBox">
+        
+      </textarea>
+
+      <button name="Encrypt" id="encryptBtn" class="btn" onclick="encrypt();">Encrypt</button>
+      <button name="Decrypt" id="decryptBtn" class="btn" onclick="decrypt();">Decrypt</button>
+  </div>
+  </div>
+  </body>
+</html>
