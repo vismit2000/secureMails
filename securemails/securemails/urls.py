@@ -23,7 +23,6 @@ from mailapp import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^mailapp/',include('mailapp.urls')),
-    url(r'^$',views.user_login,name='login'),
-    url(r'^special/',views.special,name='special'),
+    url(r'^$',views.index,name='index'),
     url(r'^logout/$', views.user_logout, name='logout'),
 ]

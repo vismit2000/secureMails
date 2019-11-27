@@ -5,21 +5,67 @@
     <meta charset="utf-8">
     <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Montserrat" rel="stylesheet" type="text/css">
     <link rel="stylesheet" type="text/css" href="{% static '/css/style2.css' %}"/>
-    <link rel="icon" href="favicon.png" type="image/x-icon">
-    <script type="application/javascript" src="{% static '/js/script.js' %}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sjcl/1.0.8/sjcl.js" type="application/javascript"></script>
+    <script src="{% static '/js/sjcl.js' %}" type="text/javascript"></script>
     <title>Hello World</title>
 
     <script>
         function loadtext()
         {
-          msgObj = '{{msgObj | safe}}';
-          usersList = '{{usersList | safe}}';
-          usersListm = '{{usersList}}';
-          console.log(usersListm);
-          console.log(usersList);
-          console.log(JSON.parse(msgObj));
-          decrypt(msgObj);
+          var msgObj = '{{msgObj | safe}}';
+          var usersList = '{{usersList | safe}}';
+          var userMail = '{{usermail | safe}}';
+          var keyEnc = '{{symmKeyEnc | safe}}';
+          var sender = '{{sender | safe}}';
+          console.log(sender);
+          saveSender(sender);
+          saveMail(userMail);
+          if(usersList != "")
+          {
+            console.log(usersList);
+            var usersList = JSON.parse(usersList);
+            var list = document.getElementsByClassName('userslist_ul')[0];
+            for(let i=0; i<usersList.length; i++)
+            {
+                var listElem = document.createElement('li');
+                var userLink = document.createElement('a');
+                userLink.href = '#';
+                
+                // userLink.onclick = 
+                userLink.innerHTML = usersList[i].email+'|@@@@@|'+usersList[i].pubkey;
+
+                userLink.onclick = function(){
+                    getOtherUserKey(this.innerHTML);
+                };
+                listElem.appendChild(userLink);
+                list.appendChild(listElem);
+            }   
+          }
+          if(msgObj != "")
+          {
+              msgObj = JSON.parse(msgObj);
+              console.log(msgObj);
+              decrypt(msgObj, keyEnc);
+          }
+            var status = '{{keyExists}}';
+            var key = '{{key}}';
+            getkey(status, key);
+        }
+
+        function searchmail() {
+            var input, filter, ul, li, a, i, txtValue;
+            input = document.getElementById("emailSearch");
+            filter = input.value.toUpperCase();
+            ul = document.getElementsByClassName("userslist_ul")[0];
+            li = ul.getElementsByTagName("li");
+            for (i = 0; i < li.length; i++) {
+                a = li[i].getElementsByTagName("a")[0];
+                txtValue = a.textContent || a.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    li[i].style.display = "";
+                } else {
+                    li[i].style.display = "none";
+                }
+            }
         }
     </script>
   </head>
@@ -28,20 +74,33 @@
       <pre>
           <a href='/logout/'><input type="button" value="Logout" class="logout"/></a>
       </pre>
-  </div>
+    </div>
     <div class="wrapper">
     <div class="container">
-      <header>
-        <h1 class="name">SECUREMAIL</h1>
-      </header>
-      
-      <textarea class="messageBox">
+          <header>
+            <h1 class="name">SECUREMAIL</h1>
+          </header>
         
-      </textarea>
-
-      <button name="Encrypt" id="encryptBtn" class="btn" onclick="encrypt();">Encrypt</button>
-      <button name="Decrypt" id="decryptBtn" class="btn" onclick="decrypt();">Decrypt</button>
+        <div class="flex-container">
+          <div style="width:60%">
+              <textarea class="messageBox">
+                
+              </textarea>
+          </div>
+            <div style="overflow-y: scroll !important;">
+                <div id="searchbox" style="height: 5vh;">
+                    <input type="text" id="emailSearch" onkeyup="searchmail()" placeholder="Search for email.." title="Type in a name">          
+                </div>
+                <div class="userslist">
+                    <ul class="userslist_ul" ></ul>                    
+                </div>
+            </div>
+        </div>
+          <div style="height:40vh;background-color:black; position:absolute; right:5vw;"></div>
+          <button name="Encrypt" id="encryptBtn" class="btn" onclick="encrypt();">Encrypt</button>
+          <button name="Decrypt" id="decryptBtn" class="btn" onclick="decrypt();">Decrypt</button>
+    </div>
   </div>
-  </div>
+  <script type="application/javascript" src="{% static '/js/script.js' %}"></script>
   </body>
 </html>
