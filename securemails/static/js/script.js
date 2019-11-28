@@ -98,9 +98,9 @@ function encrypt()
 
             
         })
-        .catch(function (error) {
-            console.log("Something went wrong", error);
-    });       
+    //     .catch(function (error) {
+    //         console.log("Something went wrong", error);
+    // });       
 
 }
 
@@ -191,7 +191,10 @@ function getkey(status, key, sec)
         // IXkJSpYK3RHRaVrd...
         userPrivKey = sec;
 
-        
+        if (typeof(Storage) !== "undefined") {
+            // Code for localStorage/sessionStorage.
+            localStorage.setItem('userPrivKey_'+myMail,userPrivKey);
+        }
         // // Unserialized private key:
         // sec = new sjcl.ecc.elGamal.secretKey(
         //     sjcl.ecc.curves.c256,
@@ -269,4 +272,9 @@ function setmsgstatus(status, data, sesKey)
     msgAvail = status;
     mssgContent = data;
     sessionKey = sesKey;
+}
+
+function savePrivKey(key)
+{
+    userPrivKey = key;
 }

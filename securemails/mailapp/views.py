@@ -116,7 +116,7 @@ def getKeysData(request):
 		userobj['name'] = users[i].user.username
 		userobj['email'] = users[i].user.email
 		userobj['pubkey'] = users[i].userPubKey
-		userobj['privKey'] = users[i].userPrivKey
+		# userobj['privKey'] = users[i].userPrivKey
 		usersList.append(userobj)
 	print(usersList)
 
@@ -128,7 +128,7 @@ def getKeysData(request):
 	else:
 		keyExists = True
 
-	keysDict = {'usersList':json.dumps(usersList),'keyExists':keyExists, 'key':pubKey, 'sec':user.userPrivKey }
+	keysDict = {'usersList':json.dumps(usersList),'keyExists':keyExists, 'key':pubKey}
 	return keysDict
 
 def login(request):

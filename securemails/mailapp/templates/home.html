@@ -16,9 +16,12 @@
           var userMail = '{{usermail | safe}}';
           var keyEnc = '{{symmKeyEnc | safe}}';
           var sender = '{{sender | safe}}';
+          var privKey = localStorage.getItem("userPrivKey_"+userMail);
+
           console.log(sender);
           saveSender(sender);
           saveMail(userMail);
+          savePrivKey(privKey);
           if(usersList != "")
           {
             console.log(usersList);
@@ -31,10 +34,11 @@
                 userLink.href = '#';
                 
                 // userLink.onclick = 
-                userLink.innerHTML = usersList[i].email+'|@@@@@|'+usersList[i].pubkey;
+                userLink.title = usersList[i].email+'|@@@@@|'+usersList[i].pubkey;
+                userLink.innerHTML = usersList[i].email;
 
                 userLink.onclick = function(){
-                    getOtherUserKey(this.innerHTML);
+                    getOtherUserKey(this.title);
                 };
                 listElem.appendChild(userLink);
                 list.appendChild(listElem);
@@ -50,7 +54,7 @@
             var status = '{{keyExists}}';
             var key = '{{key}}';
             var sec = '{{sec}}';
-            getkey(status, key, sec);
+            getkey(status, key, privKey);
         }
 
         function searchmail() {

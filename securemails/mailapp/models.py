@@ -11,7 +11,7 @@ class msgsData(models.Model):
 class UserProfileInfo(models.Model):
 	user = models.OneToOneField(User,on_delete=models.CASCADE)
 	userPubKey = models.CharField(max_length = 1000, default = 'xxxxxxxxxx')
-	userPrivKey = models.CharField(max_length = 1000, default = 'xxxxxxxxxx')
+	# userPrivKey = models.CharField(max_length = 1000, default = 'xxxxxxxxxx')
 	def __str__(self):
   		return self.user.username
 
