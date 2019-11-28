@@ -136,7 +136,7 @@ function encMain(sessionKey){
                 console.log("Success!",response);
 
                 document.getElementsByClassName('messageBox')[0].value = content;
-                msgContent = '127.0.0.1:8000/mailapp/getparams/?ivsaltsender='+parsedEncData['iv']+'|@@@@@|'+parsedEncData['salt']+'|!!!!!|'+myMail;
+                msgContent = 'https://bitsf463.pythonanywhere.com/mailapp/getparams/?ivsaltsender='+parsedEncData['iv']+'|@@@@@|'+parsedEncData['salt']+'|!!!!!|'+myMail;
 
                 if (confirm("Enciphered!! do you want to mail it?")) {
                     window.location.href = 'https://mail.google.com/mail/?view=cm&fs=1&tf=1&body='+encodeURIComponent(msgContent);
