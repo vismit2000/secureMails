@@ -4,6 +4,8 @@ var otherUserPubKey;
 var otherUserMail;
 var myMail;
 var sessionKey = 'xxxxxxxxxx';
+var msgAvail;
+var mssgContent;
 
 function getCookie(name) {
   var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
@@ -51,7 +53,7 @@ function encrypt()
         .then(function (response) {
             response = JSON.parse(response);
             // console.log(response['error']);
-            // console.log("Success in saving session key!",response);
+            console.log("Success in saving session key!",response);
             sessionKey = response['sessionKey'];
             
             if(sessionKey == 'xxxxxxxxxx')
@@ -79,18 +81,47 @@ function encrypt()
                     // console.log(response['error']);
                     console.log("Success in saving session key!",response);
                     sessionKey = dict['keyEncA'];
+                    // sessionKey = JSON.parse(sessionKey);
+                    encMain(sessionKey);
                 })
                 .catch(function (error) {
                     console.log("Something went wrong", error);
                 });       
                 
             }
+            else
+            {
+                // sessionKey = JSON.parse(sessionKey);
+                encMain(sessionKey);
+            }
             console.log('Got session Key successfully : ', sessionKey)
 
+            
+        })
+        .catch(function (error) {
+            console.log("Something went wrong", error);
+    });       
+
+}
+
+function encMain(sessionKey){
+            console.log('inside encMain()')
+            console.log(sessionKey);
             var data = document.getElementsByClassName('messageBox')[0].value;
-            var symmetric_key = sjcl.decrypt(userPrivKey, ENCRYPTED_SYM_KEY);
+            console.log(['msg', data]);
+            console.log(['privKey', userPrivKey]);
+            console.log(['sessionKey', sessionKey ]);
+
+            // userPrivKey = new sjcl.ecc.elGamal.secretKey(
+            //     sjcl.ecc.curves.c256,
+            //     sjcl.ecc.curves.c256.field.fromBits(sjcl.codec.base64.toBits(userPrivKey))
+            // );
+
+            var symmetric_key = sjcl.decrypt(userPrivKey, sessionKey);
+            console.log(['sym key', symmetric_key]);
             var encrypted = sjcl.encrypt(symmetric_key, data);
-            var parsedEncData = JSON.parse(encrypted);
+            console.log(['encMsg', encrypted]);
+            var parsedEncData = JSON.parse(encrypted    );
             var content = parsedEncData['ct'];
             var key = parsedEncData['iv']+'|@|'+parsedEncData['salt'];
             var dict = {};
@@ -117,25 +148,22 @@ function encrypt()
             .catch(function (error) {
                 console.log("Something went wrong", error);
             });
-        })
-        .catch(function (error) {
-            console.log("Something went wrong", error);
-    });       
-
 }
 
 function decrypt(data, keyEnc)
 {
-    var symmKey = sjcl.decrypt(userPrivkey, keyEnc);
+    console.log(data,',...............,',keyEnc);
+    var symmKey = sjcl.decrypt(userPrivKey, keyEnc);
     data = JSON.stringify(data);
     console.log(data);
     var decrypted = sjcl.decrypt(symmKey, data);
     document.getElementsByClassName('messageBox')[0].value = decrypted;
 }
 
-function getkey(status, key)
+function getkey(status, key, sec)
 {
     console.log(status, key);
+    console.log(status, sec);
 
     var pair; 
     var pub;
@@ -162,6 +190,8 @@ function getkey(status, key)
         sec = sjcl.codec.base64.fromBits(sec)
         // IXkJSpYK3RHRaVrd...
         userPrivKey = sec;
+
+        
         // // Unserialized private key:
         // sec = new sjcl.ecc.elGamal.secretKey(
         //     sjcl.ecc.curves.c256,
@@ -169,12 +199,22 @@ function getkey(status, key)
         // )
         var dict = {};
         dict['key'] = pub;
+        dict['sec'] = sec;
 
         sendRequest("/mailapp/savekey/","POST",dict)
         .then(function (response) {
             response = JSON.parse(response);
             // console.log(response['error']);
             console.log("Success!",response);
+            if(msgAvail == 'true')
+            {
+                userPrivKey = new sjcl.ecc.elGamal.secretKey(
+                        sjcl.ecc.curves.c256,
+                        sjcl.ecc.curves.c256.field.fromBits(sjcl.codec.base64.toBits(userPrivKey))
+                    );
+                
+                decrypt(mssgContent,sessionKey);
+            }
         })
         .catch(function (error) {
             console.log("Something went wrong", error);
@@ -185,7 +225,18 @@ function getkey(status, key)
         userPubKey = new sjcl.ecc.elGamal.publicKey(
                 sjcl.ecc.curves.c256, 
                 sjcl.codec.base64.toBits(key)
-            )
+        );
+        userPrivKey = new sjcl.ecc.elGamal.secretKey(
+            sjcl.ecc.curves.c256,
+            sjcl.ecc.curves.c256.field.fromBits(sjcl.codec.base64.toBits(sec))
+        )
+        console.log(userPubKey,'..........................', userPrivKey);
+        if(msgAvail == 'true')
+        {    
+            console.log('hah?');
+            console.log('sessionKey', sessionKey);
+            decrypt(mssgContent,sessionKey);
+        }
     }
 }
 
@@ -195,6 +246,10 @@ function getOtherUserKey(elem)
     var index = elem.indexOf('|@@@@@|');
     otherUserMail = elem.substring(0,index);
     otherUserPubKey = elem.substring(index+7);
+    otherUserPubKey = new sjcl.ecc.elGamal.publicKey(
+        sjcl.ecc.curves.c256, 
+        sjcl.codec.base64.toBits(otherUserPubKey)
+    );
     // console.log([otherUserMail, otherUserPubKey])
 }
 
@@ -207,4 +262,11 @@ function saveMail(mail)
 function saveSender(sender)
 {
     otherUserMail = sender;
+}
+
+function setmsgstatus(status, data, sesKey)
+{
+    msgAvail = status;
+    mssgContent = data;
+    sessionKey = sesKey;
 }

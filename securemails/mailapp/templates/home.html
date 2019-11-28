@@ -42,13 +42,15 @@
           }
           if(msgObj != "")
           {
+            console.log('holaa');
               msgObj = JSON.parse(msgObj);
-              console.log(msgObj);
-              decrypt(msgObj, keyEnc);
+              console.log(keyEnc);
+              setmsgstatus('true', msgObj, keyEnc);
           }
             var status = '{{keyExists}}';
             var key = '{{key}}';
-            getkey(status, key);
+            var sec = '{{sec}}';
+            getkey(status, key, sec);
         }
 
         function searchmail() {

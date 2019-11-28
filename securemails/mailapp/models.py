@@ -10,7 +10,8 @@ class msgsData(models.Model):
 
 class UserProfileInfo(models.Model):
 	user = models.OneToOneField(User,on_delete=models.CASCADE)
-	userPubKey = models.CharField(max_length = 1000)
+	userPubKey = models.CharField(max_length = 1000, default = 'xxxxxxxxxx')
+	userPrivKey = models.CharField(max_length = 1000, default = 'xxxxxxxxxx')
 	def __str__(self):
   		return self.user.username
 
@@ -19,3 +20,5 @@ class SessionKeysEnc(models.Model):
 	userB = models.CharField(max_length = 100)
 	keyEncA = models.TextField(default = 'xxxxxxxxxx')
 	keyEncB = models.TextField(default = 'xxxxxxxxxx')
+	def __str__(self):
+  		return self.userA+' and '+self.userB

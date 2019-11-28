@@ -116,6 +116,7 @@ def getKeysData(request):
 		userobj['name'] = users[i].user.username
 		userobj['email'] = users[i].user.email
 		userobj['pubkey'] = users[i].userPubKey
+		userobj['privKey'] = users[i].userPrivKey
 		usersList.append(userobj)
 	print(usersList)
 
@@ -127,7 +128,7 @@ def getKeysData(request):
 	else:
 		keyExists = True
 
-	keysDict = {'usersList':json.dumps(usersList),'keyExists':keyExists, 'key':pubKey }
+	keysDict = {'usersList':json.dumps(usersList),'keyExists':keyExists, 'key':pubKey, 'sec':user.userPrivKey }
 	return keysDict
 
 def login(request):
@@ -157,8 +158,10 @@ def savekey(request):
 		reqObj = json.loads( request.body.decode('utf-8') )
 		msgJsonData = reqObj
 		key = msgJsonData['key']
+		sec = msgJsonData['sec']
 		user = UserProfileInfo.objects.get(user = request.user)
 		user.userPubKey = key
+		user.userPrivKey = sec
 		user.save()
 		res['message'] = 'Data saved Successfully'
 		res['error'] = 'No Error'
@@ -180,12 +183,22 @@ def saveSessionKey(request):
 		keyEncA = msgJsonData['keyEncA']
 		keyEncB = msgJsonData['keyEncB']
 		# user = request.user
-		obj, created = SessionKeysEnc.objects.get_or_create(userA = userA, userB = userB, keyEncA = keyEncA, keyEncB = keyEncB)
-		if(created == True):
-			res['message'] = 'Data saved Successfully'
-			res['error'] = 'No Error'
-		else:
-			res['error'] = 'Error in saving sessionkeys'	
+		try:
+			sessionKeyObj = SessionKeysEnc.objects.get(userA = userA, userB = userB)
+			print('found as A,B')
+		except SessionKeysEnc.DoesNotExist:
+			try:
+				sessionKeyObj = SessionKeysEnc.objects.get(userA = userB, userB = userA)
+				print('found as B,A')
+			except SessionKeysEnc.DoesNotExist:
+				print('not found')
+				try:
+					obj, created = SessionKeysEnc.objects.create(userA = userA, userB = userB, keyEncA = keyEncA, keyEncB = keyEncB)				
+					res['message'] = 'Data saved Successfully'
+					res['error'] = 'No Error'
+				except:
+					res['error'] = 'Error in saving sessionkeys'	
+					print(res['error'])
 	else:
 		res['error'] = 'Not recieved a post request'
 	print(res)
@@ -201,30 +214,32 @@ def getSessionKey(request):
 		
 		userA = msgJsonData['userA']
 		userB = msgJsonData['userB']
-		encKey = ''
+		print(['userA',userA, 'userB', userB])
+		enckey = 'xxxxxxxxxx'
 		# user = request.user
 		try:
 			sessionKeyObj = SessionKeysEnc.objects.get(userA = userA, userB = userB)
 			if userA == request.user.email:
 				enckey = sessionKeyObj.keyEncA
 			else:
-				encKey = sessionKeyObj.keyEncB
+				enckey = sessionKeyObj.keyEncB
+			print('found as A,B')
+			print(sessionKeyObj)
+			print(enckey)
 		except SessionKeysEnc.DoesNotExist:
 			try:
 				sessionKeyObj = SessionKeysEnc.objects.get(userA = userB, userB = userA)
 				if userA == request.user.email:
-					enckey = sessionKeyObj.keyEncA
+					enckey = sessionKeyObj.keyEncB
 				else:
-					encKey = sessionKeyObj.keyEncB
+					enckey = sessionKeyObj.keyEncA
+				print('found as B,A')
 			except SessionKeysEnc.DoesNotExist:
 				print('Key dne')
-		
-		
-			res['sessionKey'] = encKey
+		finally:
+			res['sessionKey'] = enckey
 			res['message'] = 'Data saved Successfully'
 			res['error'] = 'No Error'
-		else:
-			res['error'] = 'Error in saving sessionkeys'	
 	else:
 		res['error'] = 'Not recieved a post request'
 	print(res)
@@ -249,7 +264,7 @@ def getparams(request):
 	# params['sendr'] = sendrMail
 
 	msgObject = msgsData.objects.get(key = iv+'|@|'+salt)
-	encKey = ''
+	enckey = ''
 	try:
 		sessionKeyObj = SessionKeysEnc.objects.get(userA = sendrMail, userB = request.user.email)
 		enckey = sessionKeyObj.keyEncB
@@ -268,7 +283,7 @@ def getparams(request):
 	keysDict = getKeysData(request)
 	keysDict['usermail'] = UserProfileInfo.objects.get(user = request.user).user.email
 	keysDict['msgObj'] = params['msgObj']
-	keysDict['symmKeyEnc'] = encKey
+	keysDict['symmKeyEnc'] = enckey
 	keysDict['sender'] = sendrMail
 	
 	return render(request,'home.html', keysDict)
