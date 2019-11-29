@@ -65,3 +65,8 @@ sk_sym1 and sk_sym2 are stored in the database.
 ### Overview
 
 ![Project GIF](./projectgif.gif)
+
+### Group Members
+
+- Harpinder Jot Singh [Github](https://github.com/HarpinderJotSingh) [LinkedIn](https://www.linkedin.com/in/harpinder-jot-singh-248b92155/?originalSubdomain=in)
+- Vishal Mittal [Github](https://github.com/vismit2000) [LinkedIn](https://www.linkedin.com/in/vishal-mittal-113494157/)
