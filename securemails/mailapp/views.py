@@ -1,11 +1,9 @@
 import json
-import requests
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render,redirect
 from mailapp.models import *
 from mailapp.forms import UserForm,UserProfileInfoForm
-from django.urls import reverse
-from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
+from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required
 
@@ -60,6 +58,7 @@ def register(request):
 	else:
 		user_form = UserForm()
 		profile_form = UserProfileInfoForm()
+		print('hola ! register working')
 	return render(request,'registration.html',
 						  {'user_form':user_form,
 						   'profile_form':profile_form,
@@ -68,7 +67,7 @@ def register(request):
 Called for loggin in
 *request has the username and password given in by the user
 This function-
-*after receiving request(POST) for login, authenticates the requesting user's 
+*after receiving request(POST) for login, authenticates the requesting user's
 password and username
 *if successful, directed to home page
 *login page rendered again in case the request is not of the type POST
@@ -100,7 +99,7 @@ def user_login(request):
 
 '''
 stores the id of the user logging in and renders home page
-'''	
+'''
 @login_required
 def home(request):
 	keysDict = getKeysData(request)
@@ -110,7 +109,7 @@ def home(request):
 # @login_required
 def getKeysData(request):
 	users = UserProfileInfo.objects.all()
-	usersList = [] 
+	usersList = []
 	for i in range(len(users)):
 		userobj = {}
 		userobj['name'] = users[i].user.username
@@ -177,7 +176,7 @@ def saveSessionKey(request):
 	if request.method == 'POST':
 		reqObj = json.loads( request.body.decode('utf-8') )
 		msgJsonData = reqObj
-		
+
 		userA = msgJsonData['userA']
 		userB = msgJsonData['userB']
 		keyEncA = msgJsonData['keyEncA']
@@ -193,11 +192,11 @@ def saveSessionKey(request):
 			except SessionKeysEnc.DoesNotExist:
 				print('not found')
 				try:
-					obj, created = SessionKeysEnc.objects.create(userA = userA, userB = userB, keyEncA = keyEncA, keyEncB = keyEncB)				
+					obj, created = SessionKeysEnc.objects.create(userA = userA, userB = userB, keyEncA = keyEncA, keyEncB = keyEncB)
 					res['message'] = 'Data saved Successfully'
 					res['error'] = 'No Error'
 				except:
-					res['error'] = 'Error in saving sessionkeys'	
+					res['error'] = 'Error in saving sessionkeys'
 					print(res['error'])
 	else:
 		res['error'] = 'Not recieved a post request'
@@ -211,7 +210,7 @@ def getSessionKey(request):
 	if request.method == 'POST':
 		reqObj = json.loads( request.body.decode('utf-8') )
 		msgJsonData = reqObj
-		
+
 		userA = msgJsonData['userA']
 		userB = msgJsonData['userB']
 		print(['userA',userA, 'userB', userB])
@@ -250,15 +249,17 @@ def getparams(request):
 	print('hi')
 	params = {}
 	params['ivsaltsender'] = request.GET.get('ivsaltsender')
-	
+
 	saltindex = params['ivsaltsender'].index('|@@@@@|')
 	mailIndex = params['ivsaltsender'].index('|!!!!!|')
-	
+
 	iv = params['ivsaltsender'][0:saltindex]
 	salt = params['ivsaltsender'][saltindex+7:mailIndex]
-	
+# 	salt = salt.replace("[]", "/")
+# 	iv = iv.replace("[]", "/")
+
 	sendrMail = params['ivsaltsender'][mailIndex+7:]
-	
+
 	params['iv'] = iv
 	params['salt'] = salt
 	# params['sendr'] = sendrMail
@@ -276,15 +277,14 @@ def getparams(request):
 			print('Key dne')
 
 	params['msgObj'] = json.loads(msgObject.value)
-	
+
 	print(type(msgObject))
 	print(params)
-	
+
 	keysDict = getKeysData(request)
 	keysDict['usermail'] = UserProfileInfo.objects.get(user = request.user).user.email
 	keysDict['msgObj'] = params['msgObj']
 	keysDict['symmKeyEnc'] = enckey
 	keysDict['sender'] = sendrMail
-	
+
 	return render(request,'home.html', keysDict)
-	

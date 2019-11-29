@@ -55,7 +55,7 @@ function encrypt()
             // console.log(response['error']);
             console.log("Success in saving session key!",response);
             sessionKey = response['sessionKey'];
-            
+
             if(sessionKey == 'xxxxxxxxxx')
             {
                 // Generate symmetric key (8 4-byte words = 256 bits)
@@ -64,7 +64,7 @@ function encrypt()
 
                 // Encrypt it using my public key
                 var sk_sym_1 = sjcl.encrypt(userPubKey, symmetric_key);
-                
+
                 // Encrypt it using receiver’s public key
                 var sk_sym_2 = sjcl.encrypt(otherUserPubKey, symmetric_key);
 
@@ -86,8 +86,8 @@ function encrypt()
                 })
                 .catch(function (error) {
                     console.log("Something went wrong", error);
-                });       
-                
+                });
+
             }
             else
             {
@@ -96,12 +96,22 @@ function encrypt()
             }
             console.log('Got session Key successfully : ', sessionKey)
 
-            
+
         })
     //     .catch(function (error) {
     //         console.log("Something went wrong", error);
-    // });       
+    // });
 
+}
+
+function escapeRegExp(str)
+{
+    return str.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+}
+
+function replaceAll(str, term, rep)
+{
+    return str.replace(new RegExp(escapeRegExp(term),'g'),rep);
 }
 
 function encMain(sessionKey){
@@ -123,6 +133,10 @@ function encMain(sessionKey){
             console.log(['encMsg', encrypted]);
             var parsedEncData = JSON.parse(encrypted    );
             var content = parsedEncData['ct'];
+            parsedEncData['iv'] = replaceAll(parsedEncData['iv'],'/','[]');
+            parsedEncData['salt'] = replaceAll(parsedEncData['salt'],'/','[]');
+            parsedEncData['iv'] = replaceAll(parsedEncData['iv'],'+','{}');
+            parsedEncData['salt'] = replaceAll(parsedEncData['salt'],'+','{}');
             var key = parsedEncData['iv']+'|@|'+parsedEncData['salt'];
             var dict = {};
             dict['key'] = key;
@@ -136,10 +150,10 @@ function encMain(sessionKey){
                 console.log("Success!",response);
 
                 document.getElementsByClassName('messageBox')[0].value = content;
-                msgContent = 'https://bitsf463.pythonanywhere.com/mailapp/getparams/?ivsaltsender='+parsedEncData['iv']+'|@@@@@|'+parsedEncData['salt']+'|!!!!!|'+myMail;
+                msgContent = 'https://securemails.pythonanywhere.com/mailapp/getparams/?ivsaltsender='+parsedEncData['iv']+'|@@@@@|'+parsedEncData['salt']+'|!!!!!|'+myMail;
 
                 if (confirm("Enciphered!! do you want to mail it?")) {
-                    window.location.href = 'https://mail.google.com/mail/?view=cm&fs=1&tf=1&body='+encodeURIComponent(msgContent);
+                    window.location.href = 'https://mail.google.com/mail/?view=cm&fs=1&tf=1&body='+encodeURIComponent(msgContent)+'&to='+otherUserMail;
                 }
                 else {
                     console.log('cancelled!!');
@@ -165,7 +179,7 @@ function getkey(status, key, sec)
     console.log(status, key);
     console.log(status, sec);
 
-    var pair; 
+    var pair;
     var pub;
 
     if(status === 'False'){
@@ -175,17 +189,17 @@ function getkey(status, key, sec)
         pair = sjcl.ecc.elGamal.generateKeys(256);
 
         pub = pair.pub.get(), sec = pair.sec.get()
-        
+
         // Serialized public key:
         pub = sjcl.codec.base64.fromBits(pub.x.concat(pub.y))
         // uQuXH/yeIpQq8hCWiwCTIMKdsaX...
 
         // Unserialized public key:
         userPubKey = new sjcl.ecc.elGamal.publicKey(
-            sjcl.ecc.curves.c256, 
+            sjcl.ecc.curves.c256,
             sjcl.codec.base64.toBits(pub)
         );
-        
+
         // Serialized private key:
         sec = sjcl.codec.base64.fromBits(sec)
         // IXkJSpYK3RHRaVrd...
@@ -215,18 +229,18 @@ function getkey(status, key, sec)
                         sjcl.ecc.curves.c256,
                         sjcl.ecc.curves.c256.field.fromBits(sjcl.codec.base64.toBits(userPrivKey))
                     );
-                
+
                 decrypt(mssgContent,sessionKey);
             }
         })
         .catch(function (error) {
             console.log("Something went wrong", error);
-        });       
+        });
     }
     else{
         //decode the key
         userPubKey = new sjcl.ecc.elGamal.publicKey(
-                sjcl.ecc.curves.c256, 
+                sjcl.ecc.curves.c256,
                 sjcl.codec.base64.toBits(key)
         );
         userPrivKey = new sjcl.ecc.elGamal.secretKey(
@@ -235,7 +249,7 @@ function getkey(status, key, sec)
         )
         console.log(userPubKey,'..........................', userPrivKey);
         if(msgAvail == 'true')
-        {    
+        {
             console.log('hah?');
             console.log('sessionKey', sessionKey);
             decrypt(mssgContent,sessionKey);
@@ -250,7 +264,7 @@ function getOtherUserKey(elem)
     otherUserMail = elem.substring(0,index);
     otherUserPubKey = elem.substring(index+7);
     otherUserPubKey = new sjcl.ecc.elGamal.publicKey(
-        sjcl.ecc.curves.c256, 
+        sjcl.ecc.curves.c256,
         sjcl.codec.base64.toBits(otherUserPubKey)
     );
     // console.log([otherUserMail, otherUserPubKey])

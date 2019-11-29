@@ -25,7 +25,7 @@ SECRET_KEY = 'qf$9bf$shr-9u6qq%mlbuue)w4e#_q&8vluw!n_wiw0w$p70ab'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['bitsf463.pythonanywhere.com',
+ALLOWED_HOSTS = ['securemails.pythonanywhere.com',
                  '127.0.0.1']
 
 
