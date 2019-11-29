@@ -1,54 +1,67 @@
-# Hello Page
+# SecureMails
 
-<img src="https://raw.githubusercontent.com/jlord/forkngo/gh-pages/badges/cobalt.png" width="200">
+This project a part of course Cryptography, BITS F463 done at BITS Pilani under Prof. Ashutosh Bhatia.
 
-![screenshot](https://user-images.githubusercontent.com/1305617/45956448-87fec380-bfe0-11e8-8b8c-1bbbee7552c6.png)
+## Motivation:
 
-A so very simple personal site.
-
-This is a [Fork-n-Go](http://jlord.github.io/forkngo) project, so fork to get started making your own.
-
-See the demo at [jlord.github.io/hello](http://jlord.github.io/hello).
-
-## Create your own
++ While sending emails on Gmail we cannot be sure whether the information remains confidential since Google can still access the mails. 
++ We wanted to make sure that the content is only accessible to the desired recipient and no one else has access to the message shared.
 
 
-| You'll Need:                                 | ☟                                                 |
-|:---------------------------------------------|:--------------------------------------------------|
-| [GitHub](http://www.github.com/join) account | Basic [HTML](http://learn.shayhowe.com/html-css/) |
+## Objective
+- A web app to send emails using Gmail but in encrypted format.
+- Key exchange implemented through asymmetric cryptography (Elliptic Curve)
+- Message encryption by Advanced Encryption Standard (AES) using Stanford Javascript Crypto Library (SJCL).
 
+## Methodology
 
-### First, fork this repository.
++ Built UI on the top of the basic UI available [here](https://github.com/jlord/hello)
++ Used SJCL library provided by Stanford for encryption and decryption purposes.
++ Used Django as the backend framework and it’s native SQLite database for storing metadata related to encryption
++ Achieved secure key exchange through asymmetric cryptography (ElGamel through Elliptic Curve).
 
-Click the fork button in the upper right. Now you have a copy of this repository on your GitHub account!
+## Flowchart
 
-### Rename your fork
+![Flowchart](./flowchart.png)
 
-Once you've forked it, click on Settings and rename your fork, because probably `hello` is not what you want in your URL. Name your new repository: `username.github.io` (but make `username` your username, for instance, I'd use `jlord.github.io`). GitHub will host all website files on the `master` branch of a repo with that account name convention. Woo! More info on that at [pages.github.com](http://www.pages.github.com).
+## Implementation:
 
-You can also give it any 'ol name and GitHub will host it using this pattern: `username.github.io/reponame`. Or you can keep it named `hello` and find it at: `username.github.io/hello`.
-
-### Make yours live
-
-1. From your fork's page on GitHub, click the index.html link, then on the next page click Edit.
-2. Make changes to the HTML so that the site reflects your name and bio.
-8. At the bottom of the site, click the Commit button to save your changes.
-
-Now your site is live! Go check it out!
-
-
-### Style
-
-There are basic styles included in `style.css` but go wild and make it your own, try other things!
-
-### Bonus Style
-
-![2](screenshot2.png)
-
-There is another style option included within this repository. If you change the CSS file specified on **line 7** in `index.html` to:
-
-```HTML
-<link rel="stylesheet" type="text/css" href="css/style.css"
+- User registers on the portal.
+- User logins into his account and is redirected to the home page.
+- The home page contains a text box for typing in the message to be sent and a list of users already registered on the portal navigable through a search box.
+- If the user’s public-private key pair does not already exist, a new public-private key pair is generated. Private key is stored in local storage while the public key is stored in the Django database - both in serialized form.
+- Otherwise, the private key of the user is retrieved from the local storage and public key from Django database
+User selects the recipient from the list as receivers using search box.
+- User enters the message and presses the ‘Encrypt’ button.
+- If sender-receiver pair session key does not already exist, a symmetric key symKey is created.
+- It is encrypted with both users’ public keys (through Elliptic Curve Cryptography)
 ```
+    E(PUa, symKey) = sk_sym1
+    E(PUb, symKey) = sk_sym2
+```
+sk_sym1 and sk_sym2 are stored in the database.
+- Otherwise, retrieve sk_sym1 (Encrypted public key of sender) from the database.
+- The symmetric key for encrypting the message (session key) is deciphered using
+```
+    symKey = D(PRa, sk_sym1)
+    CT = E(symKey, PT)             (AES)
+```
+- User is redirected to Gmail to send the encrypted message.
+- Receiver logins into the portal and enters in browser the link he receives on GMail and he gets the message decrypted.
 
-Then you'll get the other option! Commit your changes to make it live. Change the file called for back to `css/style2.css` to go back to the other.
+### Tech stack used
+
+- HTML, CSS, JS : For frontend
+- Python, Django:  For backend
+- SJCL (Stanford Javascript Crypto Library): For encrypting and decrypting the messages and for key exchange
+
+- References
+    - http://bitwiseshiftleft.github.io/sjcl/doc/
+    - https://github.com/bitwiseshiftleft/sjcl
+    - https://bitwiseshiftleft.github.io/sjcl/demo/
+    - https://courses.csail.mit.edu/6.857/2016/files/37.pdf
+    - https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
+
+### Overview
+
+![Project GIF](./projectgif.gif)
